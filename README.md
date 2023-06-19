@@ -7,7 +7,7 @@ The total counter is the sum of all the visits recieved by unique visitors on a 
 Working demo available [here](https://articexploit.xyz/), on my site.
 
 ## Installation
-- Insall php
+- Install php
 - Clone/Download the repo
 - Place the files in the directory of your webserver where you want the guestbook to be
 - Make sure the "_db.json" files are writable and readable by your webserver
