@@ -13,4 +13,4 @@ Working demo available [here](https://articexploit.xyz/), on my site.
 - Make sure the "_db.json" files are writable and readable by your webserver
 
 ## Implementation into your website
-The Counter works as is. Only think to figure out on your own is some html and css to make it look pretty.
+The Counter works as is. Only thing you need to figure out on your own is some html and css to make it look pretty.
