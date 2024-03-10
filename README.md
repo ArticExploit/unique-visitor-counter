@@ -1,7 +1,7 @@
 ## Unique Daily Visitor Counter
 A simple but complete visitor counter to track unique daily visitors on your site!  
 No cookies are used, instead it gets the client's ip, hashes it for extra privacy and uses that to determine if a new visit should be added to the counter.  
-The total counter is the sum of all the visits recieved by unique visitors on a daily basis, not the "true" and total amount of unique visitors.
+The total counter is the sum of all the visits received by unique visitors on a daily basis, not the "true" and total amount of unique visitors.
 
 ## Demo
 Working demo available [here](https://articexploit.xyz/), on my site.
