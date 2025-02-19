@@ -1,44 +1,48 @@
 <?php
-    // Get the IP address of the client
-    $ip = !empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'];
+    $ip = $_SERVER['REMOTE_ADDR'];
+    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        $ip = trim($ips[0]);
+    }
     
-    // Hash the IP address
+    if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+        die("Invalid IP address");
+    }
+
     $hashed_ip = hash('sha256', $ip);
     
-    // Get the current date and the date of yesterday
     $today = date('d-m-Y');
     $yesterday = date('d-m-Y', strtotime('-1 day'));
 
-    // Define the file names
     $hash_db = 'hash_db.json';
     $count_db = 'count_db.json';
 
-    // Open a file for locking
-    $lock_file = fopen("lockfile.txt", "w+");
+    $lock_file = fopen("lockfile.txt", "c");
 
-    // Attempt to acquire an exclusive lock
     if(flock($lock_file, LOCK_EX)) {
-        // Read and decode the contents of the files
         $decodedHashJson = file_exists($hash_db) ? json_decode(file_get_contents($hash_db), true) : [];
         $decodedCountJson = file_exists($count_db) ? json_decode(file_get_contents($count_db), true) : [];
 
-        // Initialize the array for today if it doesn't exist
+        if ($decodedHashJson === null || $decodedCountJson === null) {
+            die("Error decoding JSON");
+        }
+
         if (!isset($decodedHashJson[$today])) {
             $decodedHashJson[$today] = [];
         }
 
-        // If the hashed IP is not in the array for today, add it and increment the count
         if (!in_array($hashed_ip, $decodedHashJson[$today])) {
             $decodedHashJson[$today][] = $hashed_ip;
             $decodedCountJson[$today] = isset($decodedCountJson[$today]) ? $decodedCountJson[$today] + 1 : 1;
-            $decodedCountJson["total"] = isset($decodedCountJson["total"]) ? $decodedCountJson["total"] + 1 : 1;
         }
 
-        // Write the contents back to the files
-        file_put_contents($hash_db, json_encode($decodedHashJson, JSON_PRETTY_PRINT));
-        file_put_contents($count_db, json_encode($decodedCountJson, JSON_PRETTY_PRINT));
+        if (file_put_contents($hash_db, json_encode($decodedHashJson, JSON_PRETTY_PRINT)) === false) {
+            die("Error writing to hash_db.json");
+        }
+        if (file_put_contents($count_db, json_encode($decodedCountJson, JSON_PRETTY_PRINT)) === false) {
+            die("Error writing to count_db.json");
+        }
 
-        // Determine the day with the maximum number of visitors
         $max_visitors = 0;
         $max_day = "";
         foreach($decodedCountJson as $day => $visitors) {
@@ -49,10 +53,8 @@
             }
         }
         
-        // Release the lock
         flock($lock_file, LOCK_UN); 
     }
 
-    // Close the lock file
     fclose($lock_file);
 ?>
